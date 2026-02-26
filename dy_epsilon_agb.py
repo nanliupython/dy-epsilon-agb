@@ -123,11 +123,14 @@ def compute_eps(mix: pd.Series, ini: pd.Series) -> dict:
     beta = np.log(Rs[ANCHOR_NUM] / Rm[ANCHOR_NUM]) / np.log(ANCHOR_NUM / DENOM)
 
     eps = {}
+    EPS_ZERO_TOL = 1e-9  # treat tiny values as zero
+
     for a in A_list:
         Rcorr = Rm[a] * (a / DENOM) ** beta
-        eps[a] = (Rcorr / Rs[a] - 1.0) * 10000.0
-    return eps
+        val = (Rcorr / Rs[a] - 1.0) * 10000.0
+        eps[a] = 0.0 if abs(val) < EPS_ZERO_TOL else val
 
+    return eps
 
 def chi2_for_f(ini: pd.Series, tdu_last: pd.Series, f: float, meteorite_dict=METEORITE, fit_A=FIT_A):
     mix = mix_linear(tdu_last, ini, f)
